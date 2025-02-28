@@ -25,11 +25,11 @@ const login = async (req, res)=>{
         }
 
         res.cookie("go-vaga-token", token, {
-            httpOnly: false,
-            secure: false, //process.env.NODE_ENV === "production", // Set to true in production
-            // sameSite: "Strict", // Prevent CSRF attacks
+            httpOnly: true,  // Prevent access via JavaScript (recommended)
+            secure: true,    // Must be true in production with HTTPS
+            sameSite: "None", // Required for cross-origin cookies
             maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
-            path: '/'
+            path: "/",
         });
 
         res.status(201).json({message: "login successfull", token})
