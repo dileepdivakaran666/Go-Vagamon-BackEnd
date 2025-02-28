@@ -41,9 +41,10 @@ const login = async (req, res)=>{
 const logout = async (req, res) => {
     try {
       res.clearCookie('go-vaga-token', {
-        httpOnly: false,
-        secure: false,
-        path: '/'
+        httpOnly: true,  // Prevent access via JavaScript (recommended)
+        secure: true,    // Must be true in production with HTTPS
+        sameSite: "None", // Required for cross-origin cookies
+        path: "/",
       });
   
       res.status(200).json({ message: 'Logout Successfully' });
