@@ -1,5 +1,6 @@
 const Resort = require('../Model/resort');
 const multer = require('multer');
+const fs = require('fs')
 const path = require('path');
 
 // Configure multer for file uploads
@@ -50,4 +51,65 @@ const resort = async (req, res) => {
   }
 };
 
-module.exports = { resort, upload };
+
+// Update a resort
+const updateResort = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, location, amenities, price } = req.body;
+
+    const resort = await Resort.findById(id);
+    if (!resort) {
+      return res.status(404).json({ msg: 'Resort not found' });
+    }
+
+    // // Get new uploaded files
+    // const newPhotos = req.files['photos'] ? req.files['photos'].map((file) => file.filename) : [];
+    // const newVideos = req.files['videos'] ? req.files['videos'].map((file) => file.filename) : [];
+
+    // Merge new files with existing ones
+    // const updatedPhotos = [...resort.photos, ...newPhotos];
+    // const updatedVideos = [...resort.videos, ...newVideos];
+    const updatedAmenities = amenities ? amenities : resort.amenities;
+
+    // Update resort details
+    const updatedResort = await Resort.findByIdAndUpdate(
+      id,
+      { name, description, location, amenities: updatedAmenities, price },
+      { new: true }
+    );
+
+    res.status(200).json({ message: 'Resort updated successfully', updatedResort });
+  } catch (err) {
+    res.status(500).json({ msg: 'Server error', err });
+  }
+};
+
+// Delete a resort
+const deleteResort = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const resort = await Resort.findById(id);
+    if (!resort) {
+      return res.status(404).json({ msg: 'Resort not found' });
+    }
+
+    // Delete resort photos and videos from the server
+    [...resort.photos, ...resort.videos].forEach((file) => {
+      const filePath = path.join(__dirname, '../uploads/', file);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath); // Delete file
+      }
+    });
+
+    await Resort.findByIdAndDelete(id);
+
+    res.status(200).json({ message: 'Resort deleted successfully' });
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ msg: 'Server error', err });
+  }
+};
+
+module.exports = { resort,updateResort, deleteResort, upload };

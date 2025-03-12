@@ -14,8 +14,11 @@ dotenv.config()
 connectDB()
 
 const app = express()
+
+const allowedOrigins = ['https://govagamon.netlify.app', 'http://localhost:3000'];
+
 app.use(cors({
-    origin: "https://govagamon.netlify.app", // Allow only your frontend origin
+    origin: allowedOrigins, // Allow only your frontend origin
     credentials: true, // Allow cookies
 }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
